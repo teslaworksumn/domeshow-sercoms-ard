@@ -14,7 +14,15 @@
 #define DSCOM_STATE_APPLY     2
 #define DSCOM_MAGIC_LENGTH    4
 
-#define DEBUG
+/*
+ * Use the following defines to control debug info:
+ * #define DSCOM_DEBUG
+ * #define DSCOM_DEBUG_1
+ * #define DSCOM_DEBUG_2
+ */
+
+#define DSCOM_DEBUG
+#define DSCOM_DEBUG_1
 
 class DSCom {
 public:
@@ -29,7 +37,6 @@ public:
         return data_len;
     }
     inline bool isUpdated() {
-        updated = false;
         return updated;
     }
 
