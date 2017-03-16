@@ -1,6 +1,6 @@
 #ifndef DSCom_H
 #define DSCom_H
-#define LIBRARY_VERSION_DSCOM_H   "0.1"
+#define LIBRARY_VERSION_DSCOM_H   "0.1.0-alpha"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
