@@ -99,7 +99,7 @@ def serial_reader():
 				if flush:
 					sys.stdout.flush()
 					flush = False
-			time.sleep(0.05)
+			#time.sleep(0.001)
 		except SystemExit:
 			sys.stdout.write('SERIAL exiting due to SystemExit\n')
 			break
@@ -152,7 +152,6 @@ def senddata(data):
 	if dl > 4096:
 		raise IndexError("Data length must be <=4096 ({1} found)".format(dl))
 	dlhl = highlow16(dl)
-	sendmagic()
-	d2s = [dlhl[0],dlhl[1]]+data+[crchl[0],crchl[1]]
-	port.write(bytes(d2s))
+	d2s = magicpacket+[dlhl[0],dlhl[1]]+data+[crchl[0],crchl[1]]
+	port.write(bytearray(d2s))
 
