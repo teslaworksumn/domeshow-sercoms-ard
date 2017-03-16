@@ -11,8 +11,10 @@ void DSCom::read(HardwareSerial &s) {
             if (s.available() > 1) {
                 #ifdef DSCOM_DEBUG_2
                     s.print("Peek: ");
-                    char b = s.peek();
-                    s.println(b);
+                    s.print(s.peek(), HEX);
+                    s.print(" (");
+                    s.print(magic[magic_status],HEX);
+                    s.println(")");
                 #endif
                 if (s.read() == magic[magic_status]) {
                     magic_status++;
@@ -24,6 +26,7 @@ void DSCom::read(HardwareSerial &s) {
                     s.println(magic_status);
                 #endif
                 if (magic_status >= DSCOM_MAGIC_LENGTH) {
+                    magic_status=0;
                     state = DSCOM_STATE_READING;
                     messagewalk = false;
                 }

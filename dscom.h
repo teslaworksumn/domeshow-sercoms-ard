@@ -23,6 +23,7 @@
 
 #define DSCOM_DEBUG
 #define DSCOM_DEBUG_1
+#define DSCOM_DEBUG_2
 
 class DSCom {
 public:
