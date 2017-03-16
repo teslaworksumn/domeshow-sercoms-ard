@@ -1,6 +1,6 @@
 #ifndef DSCom_H
 #define DSCom_H
-#define LIBRARY_VERSION_DSCOM_H   "0.1.0-alpha"
+#define LIBRARY_VERSION_DSCOM_H   "0.2.0-alpha"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -27,10 +27,15 @@
 
 class DSCom {
 public:
-    //inline DSCom() {};
+    inline DSCom() {
+        s = &Serial;
+    }
+    inline DSCom(HardwareSerial &port) {
+        s = &port;
+    };
     // There are two versions of the read() function: one for HardwareSerial and
     //  one for SoftwareSerial
-    void read(HardwareSerial &s);
+    void read();
     //read(SoftwareSerial s);
 
     uint8_t* getData();
@@ -42,6 +47,7 @@ public:
     }
 
 private:
+    HardwareSerial* s;
     bool messagewalk = false;  // Prevents spamming Serial monitor
     const uint8_t magic[DSCOM_MAGIC_LENGTH] = {0xde, 0xad, 0xbe, 0xef};
     uint8_t magic_status = 0;
@@ -54,8 +60,8 @@ private:
     uint16_t data_len = 0;
     uint16_t new_data_len = 0;
 
-    uint16_t getTwoBytesSerial(HardwareSerial &s);
-    void readData(HardwareSerial &s, uint16_t len);
+    uint16_t getTwoBytesSerial();
+    void readData(uint16_t len);
 
     crc16 crc;
 };
