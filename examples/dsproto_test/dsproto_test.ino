@@ -1,7 +1,8 @@
+#define DSCOM_DEBUG
+#define DSCOM_DEBUG_1
 #include <dscom.h>
 
-#define DEBUG
-#define SERIAL_BUFFER_SIZE 512
+
 
 DSCom dsc;
 
@@ -11,8 +12,10 @@ void setup() {
 
 void loop() {
     dsc.read(Serial);
-    /*if (dsc.isUpdated()) {
-        Serial.write(dsc.getData(),dsc.getDataLen());
+    if (dsc.isUpdated()) {
+        for (uint16_t i=0; i<dsc.getDataLen(); i++) {
+            Serial.print(dsc.getData()[i],HEX);
+        }
         Serial.println();
-    }*/
+    }
 }
