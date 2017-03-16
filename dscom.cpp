@@ -96,6 +96,19 @@ void DSCom::read() {
     }
 }
 
+void DSCom::write(uint8_t* out_data, uint16_t len) {
+    uint8_t len_high, len_low, crc_high, crc_low;
+    uint16_t crc = crc.XModemCrc(out_data, 0, len)
+    DSCom::splitTwoBytes(len, len_high, len_low);
+    DSCom::splitTwoBytes(crc, crc_high, crc_low);
+    s->write(magic, DSCOM_MAGIC_LENGTH);
+    s->write(len_high);
+    s->write(len_low);
+    s->write(out_data, len);
+    s->write(crc_high);
+    s->write(crc_low);
+}
+
 uint16_t DSCom::getTwoBytesSerial() {
     // Wait for serial bytes
     while (s->available() < 2) {}
@@ -103,6 +116,11 @@ uint16_t DSCom::getTwoBytesSerial() {
     uint16_t low = s->read();
     uint16_t combined = high | low;
     return combined;
+}
+
+void DSCom::splitTwoBytes(uint16_t in, uint8_t &out_high, uint8_t &out_low) {
+    out_high = in >> 8;
+    out_low = in & 0xff;
 }
 
 void DSCom::readData(uint16_t len) {
