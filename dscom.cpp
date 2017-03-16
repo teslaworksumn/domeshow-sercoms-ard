@@ -1,4 +1,6 @@
-void read(HardwareSerial s) {
+#include "dscom.h"
+
+void DSCom::read(HardwareSerial &s) {
     switch (state) {
         case DSCOM_STATE_READY:
             #ifdef DEBUG
@@ -20,6 +22,7 @@ void read(HardwareSerial s) {
                 #ifdef DEBUG
                     s.print("Magic status: ");
                     s.println(magic_status);
+
                 #endif
                 if (magic_status >= DSCOM_MAGIC_LENGTH) {
                     state = DSCOM_STATE_READING;
@@ -29,23 +32,25 @@ void read(HardwareSerial s) {
             break;
         case DSCOM_STATE_READING:
             #ifdef DEBUG
-                if (!messagewalk) s.println("READING");
+                if (!messagewalk) {
+                    s.println("READING");
+                }
             #endif
             messagewalk = true;
             if (s.available() > 2) {
-                uint16_t len = getTwoBytesSerial();
+                uint16_t len = getTwoBytesSerial(s);
                 #ifdef DEBUG
                     s.print("Length: ");
                     s.println(len);
                 #endif
-                readData(len);
+                readData(s, len);
                 #ifdef DEBUG
                     s.println("Data read");
                 #endif
                 // Update len for future use (writing)
-                data_len = len;
-                uint16_t packetCrc = getTwoBytesSerial();
-                uint16_t calculatedCrc = crc.XModemCrc(data, 0, data_len);
+                //data_len = len;
+                uint16_t packetCrc = getTwoBytesSerial(s);
+                uint16_t calculatedCrc = crc.XModemCrc(new_data, 0, len);
                 #ifdef DEBUG
                     s.print("Calculated CRC: ");
                     s.println(calculatedCrc, HEX);
@@ -71,13 +76,15 @@ void read(HardwareSerial s) {
                 if (!messagewalk) s.println("APPLY");
             #endif
             messagewalk = false;
-            uint8_t* old_data = data;
+            uint8_t* old_data;
+            old_data = data;
             data = new_data;
             data_len = new_data_len;
-            free(old_data)
+            free(old_data);
             #ifdef DEBUG
                 s.println("Done applying");
             #endif
+            updated = true;
             state = DSCOM_STATE_READY;
             break;
         default:
@@ -87,7 +94,7 @@ void read(HardwareSerial s) {
     }
 }
 
-uint16_t getTwoBytesSerial(HardwareSerial s) {
+uint16_t DSCom::getTwoBytesSerial(HardwareSerial &s) {
     // Wait for serial bytes
     while (s.available() < 2) {}
     uint16_t high = s.read() << 8;
@@ -96,11 +103,9 @@ uint16_t getTwoBytesSerial(HardwareSerial s) {
     return combined;
 }
 
-void readData(uint16_t len) {
-    // Resize data array if smaller than len
-    // Should never happen
-    new_data_len = len
-    
+void DSCom::readData(HardwareSerial &s, uint16_t len) {
+    new_data_len = len;
+    new_data = malloc(sizeof(uint8_t)*len);
     while (s.available() < len) {}
     
     // Read in data from serial
@@ -108,8 +113,6 @@ void readData(uint16_t len) {
     
 }
 
-void cts(HardwareSerial s) {
-    for (int i=DSCOM_MAGIC_LENGTH-1; i>=0; i--) {
-        s.write(magic[i]);
-    }
+uint8_t* DSCom::getData() {
+    return data;
 }
