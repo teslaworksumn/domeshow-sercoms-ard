@@ -1,6 +1,6 @@
 #ifndef DSCom_H
 #define DSCom_H
-#define LIBRARY_VERSION_DSCOM_H   "0.2.0-alpha"
+#define LIBRARY_VERSION_DSCOM_H   "0.3.0-alpha"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -28,23 +28,49 @@
 
 class DSCom {
 public:
+    /**
+     * Default constructor.  Uses the primary serial port by default
+     */
     inline DSCom() {
         s = &Serial;
     }
+    /**
+     * Constructor, specifying a particular serial port
+     */
     inline DSCom(HardwareSerial &port) {
         s = &port;
     };
-    // There are two versions of the read() function: one for HardwareSerial and
-    //  one for SoftwareSerial
+
+    /**
+     * Call this in a loop to read and process the data from the serial port
+     */
     void read();
-    //read(SoftwareSerial s);
+
+    /**
+     * Returns the last array of integers received by the library.
+     *  WARNING: do not call before the first packet has been received.
+     *  That may have unexpected results.
+     */
     uint8_t* getData();
+
+    /**
+     * Returns the number of items returned by getData() 
+     */
     inline uint16_t getDataLen() {
         return data_len;
     }
+
+    /**
+     * Returns true if a packet has been received since getData() was last
+     *  called.
+     */
     inline bool isUpdated() {
         return updated;
     }
+
+    /**
+     * writes data of length len to the serial port
+     */
     void write(uint8_t* data, uint16_t len);
 
 private:
