@@ -19,11 +19,12 @@
  * #define DSCOM_DEBUG
  * #define DSCOM_DEBUG_1
  * #define DSCOM_DEBUG_2
+ * WARNING: DO NOT ATTEMPT TO DEBUG AND WRITE!
  */
 
-#define DSCOM_DEBUG
-#define DSCOM_DEBUG_1
-#define DSCOM_DEBUG_2
+//#define DSCOM_DEBUG
+//#define DSCOM_DEBUG_1
+//#define DSCOM_DEBUG_2
 
 class DSCom {
 public:
@@ -37,7 +38,6 @@ public:
     //  one for SoftwareSerial
     void read();
     //read(SoftwareSerial s);
-
     uint8_t* getData();
     inline uint16_t getDataLen() {
         return data_len;
@@ -45,6 +45,7 @@ public:
     inline bool isUpdated() {
         return updated;
     }
+    void write(uint8_t* data, uint16_t len);
 
 private:
     HardwareSerial* s;
@@ -61,6 +62,7 @@ private:
     uint16_t new_data_len = 0;
 
     uint16_t getTwoBytesSerial();
+    void splitTwoBytes(uint16_t in, uint8_t &out_high, uint8_t &out_low);
     void readData(uint16_t len);
 
     crc16 crc;

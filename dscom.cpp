@@ -98,9 +98,9 @@ void DSCom::read() {
 
 void DSCom::write(uint8_t* out_data, uint16_t len) {
     uint8_t len_high, len_low, crc_high, crc_low;
-    uint16_t crc = crc.XModemCrc(out_data, 0, len)
-    DSCom::splitTwoBytes(len, len_high, len_low);
-    DSCom::splitTwoBytes(crc, crc_high, crc_low);
+    uint16_t data_crc = crc.XModemCrc(out_data, 0, len);
+    splitTwoBytes(len, len_high, len_low);
+    splitTwoBytes(data_crc, crc_high, crc_low);
     s->write(magic, DSCOM_MAGIC_LENGTH);
     s->write(len_high);
     s->write(len_low);
