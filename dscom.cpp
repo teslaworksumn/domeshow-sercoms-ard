@@ -7,7 +7,6 @@ void DSCom::read() {
                 if (!messagewalk) s->println("READY");
             #endif
             messagewalk = true;
-            //cts();
             if (s->available() > 1) {
                 #ifdef DSCOM_DEBUG_2
                     s->print("Peek: ");
@@ -49,8 +48,6 @@ void DSCom::read() {
                 #ifdef DSCOM_DEBUG_1
                     s->println("Data read");
                 #endif
-                // Update len for future use (writing)
-                //data_len = len;
                 uint16_t packetCrc = getTwoBytesSerial();
                 uint16_t calculatedCrc = crc.XModemCrc(new_data, 0, len);
                 #ifdef DSCOM_DEBUG_1
@@ -65,6 +62,7 @@ void DSCom::read() {
                     #ifdef DSCOM_DEBUG_1
                         s->println("CRC doesn't match");
                     #endif
+                    free(new_data);
                     state = DSCOM_STATE_READY;
                 }
                 else
@@ -78,11 +76,9 @@ void DSCom::read() {
                 if (!messagewalk) s->println("APPLY");
             #endif
             messagewalk = false;
-            uint8_t* old_data;
-            old_data = data;
+            free(data);
             data = new_data;
             data_len = new_data_len;
-            free(old_data);
             #ifdef DSCOM_DEBUG_2
                 s->println("Done applying");
             #endif
@@ -127,7 +123,6 @@ void DSCom::readData(uint16_t len) {
     new_data_len = len;
     new_data = (uint8_t*)malloc(sizeof(uint8_t)*len);
     while ((uint16_t)s->available() < len) {}
-    
     // Read in data from serial
     s->readBytes(new_data, len);
 }
