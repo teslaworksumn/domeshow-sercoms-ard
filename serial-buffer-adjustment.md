@@ -34,7 +34,7 @@ The buffer size will be a `#define` with a name like `SERIAL_TX_BUFFER_SIZE`.  I
 #endif
 ```
 
-In this example, the Arduino defaults to a buffer size of 64 bytes, falling back to 16 bytes if the Arduino has a low RAM size.  We don't care about the low RAM Arduino, since we're drastically increasing the buffer size.  Update both `SERIAL_TX_BUFFER_SIZE` and `SERIAL_RX_BUFFER_SIZE` from `64` to `256`.  Note that 255 is the largest value that fits in a ring buffer controlled by an 8-bit size (a few lines down the code bumps the buffer size from an 8-bit to a 16-bit value if the buffer size exceeds 256).  When you've made this changes, save and close the file.
+In this example, the Arduino defaults to a buffer size of 64 bytes, falling back to 16 bytes if the Arduino has a low RAM size.  We don't care about the low RAM Arduino, since we're drastically increasing the buffer size.  Update both `SERIAL_TX_BUFFER_SIZE` and `SERIAL_RX_BUFFER_SIZE` from `64` to `256`.  Note that 256 is the largest value that fits in a ring buffer controlled by an 8-bit size (a few lines down the code bumps the buffer size from an 8-bit to a 16-bit value if the buffer size exceeds 256).  When you've made this changes, save and close the file.
 
 ## Base directories
 
