@@ -1,6 +1,6 @@
 #ifndef DSCom_H
 #define DSCom_H
-#define LIBRARY_VERSION_DSCOM_H   "0.3.1-alpha"
+#define LIBRARY_VERSION_DSCOM_H   "0.3.2-alpha"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -30,10 +30,13 @@ class DSCom {
 public:
     /**
      * Default constructor.  Uses the primary serial port by default
+     * Do not use with a native USB port.  Things break.
      */
+    /* TODO: Broken on Teensy: DO NOT USE
     inline DSCom() {
         s = &Serial;
     }
+    */
     /**
      * Constructor, specifying a particular serial port
      */
