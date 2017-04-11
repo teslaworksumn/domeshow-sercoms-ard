@@ -5,7 +5,7 @@ import time
 
 magic = [0xde, 0xad, 0xbe, 0xef]
 
-port = serial.Serial(sys.argv[1], int(sys.argv[2]))
+port = serial.Serial(sys.argv[1], int(sys.argv[2]), rtscts=False, dsrdtr=False, xonxoff=False)
 
 state = 0
 new_data = []
@@ -133,7 +133,7 @@ def main():
             for i in getData():
                 sys.stdout.write("{0:02x} ".format(i))
             sys.stdout.write("\n".format(i))
-    time.sleep(0.001)
+    time.sleep(0.005)
 
 if sys.flags.interactive:
     pass
