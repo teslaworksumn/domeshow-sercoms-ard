@@ -4,16 +4,16 @@ void DSCom::read() {
     switch (state) {
         case DSCOM_STATE_READY:
             #ifdef DSCOM_DEBUG
-                if (!messagewalk) s->println("READY");
+                if (!messagewalk) Serial.println("READY");
             #endif
             messagewalk = true;
             if (s->available() > 1) {
                 #ifdef DSCOM_DEBUG_2
-                    s->print("Peek: ");
-                    s->print(s->peek(), HEX);
-                    s->print(" (");
-                    s->print(magic[magic_status],HEX);
-                    s->println(")");
+                    Serial.print("Peek: ");
+                    Serial.print(Serial.peek(), HEX);
+                    Serial.print(" (");
+                    Serial.print(magic[magic_status],HEX);
+                    Serial.println(")");
                 #endif
                 if (s->read() == magic[magic_status]) {
                     magic_status++;
@@ -21,8 +21,8 @@ void DSCom::read() {
                     magic_status=0;
                 }
                 #ifdef DSCOM_DEBUG_1
-                    s->print("Magic status: ");
-                    s->println(magic_status);
+                    Serial.print("Magic status: ");
+                    Serial.println(magic_status);
                 #endif
                 if (magic_status >= DSCOM_MAGIC_LENGTH) {
                     magic_status=0;
@@ -34,53 +34,71 @@ void DSCom::read() {
         case DSCOM_STATE_READING:
             #ifdef DSCOM_DEBUG
                 if (!messagewalk) {
-                    s->println("READING");
+                    Serial.println("READING");
                 }
             #endif
             messagewalk = true;
             if (s->available() > 2) {
                 uint16_t len = getTwoBytesSerial();
                 #ifdef DSCOM_DEBUG_1
-                    s->print("Length: ");
-                    s->println(len);
+                    Serial.print("Length: ");
+                    Serial.println(len);
                 #endif
-                readData(len);
-                #ifdef DSCOM_DEBUG_1
-                    s->println("Data read");
-                #endif
-                uint16_t packetCrc = getTwoBytesSerial();
-                uint16_t calculatedCrc = crc.XModemCrc(new_data, 0, len);
-                #ifdef DSCOM_DEBUG_1
-                    s->print("Calculated CRC: ");
-                    s->println(calculatedCrc, HEX);
-                    s->print("Received CRC: ");
-                    s->println(packetCrc, HEX);
-                #endif
-                messagewalk = false;
-                if (calculatedCrc != packetCrc)
-                {
+                uint16_t rd = 0;
+                if (len == 0) {
+                    new_data_len = 0;
+                    new_data = NULL;
+                } else if (len > DSCOM_MAX_LENGTH) {
                     #ifdef DSCOM_DEBUG_1
-                        s->println("CRC doesn't match");
+                        Serial.println("Data NOT read (exceeds max len of DSCOM_MAX_LENGTH)");
                     #endif
-                    free(new_data);
                     state = DSCOM_STATE_READY;
+                } else {
+                    rd = readData(len);
                 }
-                else
-                {
-                    state = DSCOM_STATE_APPLY;
+                if (!rd) {
+                    #ifdef DSCOM_DEBUG_1
+                        Serial.println("Data NOT read (bad packet or out of memory)");
+                    #endif
+                    state = DSCOM_STATE_READY;
+                } else {
+                    #ifdef DSCOM_DEBUG_1
+                        Serial.println("Data read");
+                    #endif
+                    uint16_t packetCrc = getTwoBytesSerial();
+                    uint16_t calculatedCrc = crc.XModemCrc(new_data, 0, len);
+                    #ifdef DSCOM_DEBUG_1
+                        Serial.print("Calculated CRC: ");
+                        Serial.println(calculatedCrc, HEX);
+                        Serial.print("Received CRC: ");
+                        Serial.println(packetCrc, HEX);
+                    #endif
+                    messagewalk = false;
+                    if (calculatedCrc != packetCrc)
+                    {
+                        #ifdef DSCOM_DEBUG_1
+                            Serial.println("CRC doesn't match");
+                        #endif
+                        free(new_data);
+                        state = DSCOM_STATE_READY;
+                    }
+                    else
+                    {
+                        state = DSCOM_STATE_APPLY;
+                    }
                 }
             }
             break;
         case DSCOM_STATE_APPLY:
             #ifdef DSCOM_DEBUG
-                if (!messagewalk) s->println("APPLY");
+                if (!messagewalk) Serial.println("APPLY");
             #endif
             messagewalk = false;
             free(data);
             data = new_data;
             data_len = new_data_len;
             #ifdef DSCOM_DEBUG_2
-                s->println("Done applying");
+                Serial.println("Done applying");
             #endif
             updated = true;
             state = DSCOM_STATE_READY;
@@ -119,12 +137,16 @@ void DSCom::splitTwoBytes(uint16_t in, uint8_t &out_high, uint8_t &out_low) {
     out_low = in & 0xff;
 }
 
-void DSCom::readData(uint16_t len) {
+uint16_t DSCom::readData(uint16_t len) {
     new_data_len = len;
     new_data = (uint8_t*)malloc(sizeof(uint8_t)*len);
-    while ((uint16_t)s->available() < len) {}
-    // Read in data from serial
-    s->readBytes(new_data, len);
+    if (new_data) {
+        while ((uint16_t)s->available() < len) {}
+        // Read in data from serial
+        return s->readBytes(new_data, len);
+    } else {
+        return 0;
+    }
 }
 
 uint8_t* DSCom::getData() {

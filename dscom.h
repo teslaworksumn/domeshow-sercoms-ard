@@ -14,6 +14,8 @@
 #define DSCOM_STATE_APPLY     2
 #define DSCOM_MAGIC_LENGTH    4
 
+#define DSCOM_MAX_LENGTH      128
+
 /*
  * Use the following defines to control debug info:
  * #define DSCOM_DEBUG
@@ -92,7 +94,7 @@ private:
 
     uint16_t getTwoBytesSerial();
     void splitTwoBytes(uint16_t in, uint8_t &out_high, uint8_t &out_low);
-    void readData(uint16_t len);
+    uint16_t readData(uint16_t len);
 
     crc16 crc;
 };
