@@ -76,7 +76,14 @@ public:
     /**
      * writes data of length len to the serial port
      */
-    void write(uint8_t* data, uint16_t len);
+    uint16_t write(uint8_t* data, uint16_t len);
+
+    /**
+     * Calls the serial port's flush() function (convenience function)
+     */
+    inline void flush() {
+        s->flush();
+    }
 
 private:
     HardwareSerial* s;
